@@ -1,3 +1,8 @@
+# Storage Folders
+*.DS_STORE
+AddressBook/
+SMS/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
