@@ -2,9 +2,9 @@ import sqlite3
 import operator
 import re
 import sys
-conn = sqlite3.connect("sms/sms.db")
-addconn = sqlite3.connect("AddressBook/AddressBook.sqlitedb")
-c = conn.cursor()
+
+prefix = "Sechler"
+
 
 endDict = {}
 wordDict = {}
@@ -13,7 +13,7 @@ aveDict = {}
 SORTER = endDict
 NUM_ROWS = 10
 
-def getHandleNumber(handle):
+def getHandleNumber(handle, conn):
     """TODO: Docstring for getHandleNumber.
     :returns: TODO
 
@@ -26,8 +26,8 @@ def getHandleNumber(handle):
     else:
         return None
 
-def getNameFromNumber(number):
-    """TODO: Docstring for getNameFromNumber.
+def getNameFromNumber(number, addconn):
+    """TODO: Docstring for getNa meFromNumber.
 
     :number: TODO
     :returns: TODO
@@ -62,12 +62,16 @@ def keywithmaxval(d):
 #     if printer is not None:
 #         print(printer[2])
 def rank():
+    conn = sqlite3.connect(prefix + "/sms/sms.db")
+    addconn = sqlite3.connect(prefix + "/AddressBook/AddressBook.sqlitedb")
+    c = conn.cursor()
     c.execute("SELECT text, handle_id FROM `message`  ORDER BY `_rowid_` ASC LIMIT 0, 50000;")
+
     # print("Totaling")
     for row in c.fetchall():
         handle = row[1]
         # print(handle)
-        number = getHandleNumber(handle)
+        number = getHandleNumber(handle, conn)
         if number is None:
             continue
         words = len(re.findall("[a-zA-Z_]+", row[0]))
@@ -100,18 +104,20 @@ def rank():
             wordcount = wordDict[highestkey]
         # print(str(i + 1) + ": " + getNameFromNumber(highestkey) + ": " + str(result) + " messages, " + str(wordcount) + " words, " + str(wordcount//result) + " words/message")
         # print(highestkey[2] + ": " + str(endDict.pop(highestkey)))
-        print("{:0>2d}: {: >14s}: {: >6,d} messages {: >6,d} words {: >2,d} words/message".format(i+1, getNameFromNumber(highestkey), result, wordcount, wordcount//result))
+        print("{:0>2d}: {: >14s}: {: >6,d} messages {: >6,d} words {: >2,d} words/message".format(i+1, getNameFromNumber(highestkey, addconn), result, wordcount, wordcount//result))
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         # print(sys.argv[1])
-        NUM_ROWS = int(sys.argv[1])
-    if len(sys.argv) == 3:
-        if sys.argv[2] == "message":
+        prefix = sys.argv[1]
+    if len(sys.argv) > 2:
+        NUM_ROWS = int(sys.argv[2])
+    if len(sys.argv) == 4:
+        if sys.argv[3] == "message":
             SORTER = endDict
-        elif sys.argv[2] == "word":
+        elif sys.argv[3] == "word":
             SORTER = wordDict
-        elif sys.argv[2] == "average":
+        elif sys.argv[3] == "average":
             SORTER = aveDict
         else:
             print("Thats not a valid argument")
