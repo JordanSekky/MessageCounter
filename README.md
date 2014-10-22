@@ -6,4 +6,11 @@ Reads ios message and address book databases to rank contacts by message count, 
 Usage:
 ------
 
-```python3 messagecounter.py <number of listings> <message|word|average>```
+```python3 messagecounter.py <database folder name> <number of listings> <message|word|average>```
+
+Folder Structure
+------
+
+SMS Database: ```Name/sms/sms.db```  
+
+Contacts Database: ```Name/AddressBook/AddressBook.sqlitedb```
