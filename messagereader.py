@@ -54,7 +54,7 @@ def getNameFromNumber(number, addconn):
     personRow = a.fetchone()
     # print(personRow)
     if personRow[1] is not None:
-        name = personRow[0] + " " + personRow[1]
+        name = personRow[0] + " " + personRow[1].split()[0]
     else:
         name = personRow[0]
     return name
@@ -81,7 +81,11 @@ def rank():
         number = getHandleNumber(handle, conn)
         if number is None:
             continue
-        words = len(re.findall("[a-zA-Z_]+", row[0]))
+        if row[0] is not None:
+            words = len(re.findall("[a-zA-Z_]+", row[0]))
+        else:
+            words = 0
+        # words = len(row[0].split())
         if not number in endDict.keys():
             endDict[number] = 1
         else:
@@ -111,7 +115,7 @@ def rank():
             wordcount = wordDict[highestkey]
         # print(str(i + 1) + ": " + getNameFromNumber(highestkey) + ": " + str(result) + " messages, " + str(wordcount) + " words, " + str(wordcount//result) + " words/message")
         # print(highestkey[2] + ": " + str(endDict.pop(highestkey)))
-        print("{:0>2d}: {: >14s}: {: >6,d} messages {: >6,d} words {: >2,d} words/message".format(i+1, getNameFromNumber(highestkey, addconn), result, wordcount, wordcount//result))
+        print("{:0>2d}: {: >19s}: {: >6,d} messages {: >6,d} words {: >2,d} words/message".format(i+1, getNameFromNumber(highestkey, addconn), result, wordcount, wordcount//result))
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
