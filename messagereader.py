@@ -10,6 +10,8 @@ endDict = {}
 wordDict = {}
 aveDict = {}
 
+handleDict = {}
+
 SORTER = endDict
 NUM_ROWS = 10
 
@@ -18,13 +20,18 @@ def getHandleNumber(handle, conn):
     :returns: TODO
 
     """
-    d = conn.cursor()
-    d.execute("SELECT `_rowid_`,* FROM `handle` WHERE 1=1 AND `ROWID` LIKE '" + str(handle) + "' ORDER BY `_rowid_` ASC LIMIT 0, 50000;", )
-    result = d.fetchone()
-    if result is not None:
-        return result[2]
+    if handle in handleDict.keys():
+        return handleDict[handle]
     else:
-        return None
+        d = conn.cursor()
+        d.execute("SELECT `id` FROM `handle` WHERE 1=1 AND `ROWID` LIKE '" + str(handle) + "' ORDER BY `_rowid_` ASC LIMIT 0, 1;", )
+        result = d.fetchone()
+        if result is not None:
+            handleDict[handle] = result[0]
+            return result[0]
+        else:
+            handleDict[handle] = None
+            return None
 
 def getNameFromNumber(number, addconn):
     """TODO: Docstring for getNa meFromNumber.
