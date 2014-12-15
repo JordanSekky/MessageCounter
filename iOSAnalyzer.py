@@ -6,10 +6,12 @@ from clint.textui import progress
 
 r = reader()
 
+# Constants:
 prefix = "Sechler"
 numlines = 10
 numdays = 365*1
 pollingnum = 10
+
 r.addAddressBook(prefix + "/AddressBook/AddressBook.sqlitedb")
 r.addSMSDatabase(prefix + "/sms/sms.db")
 numberwords = []
