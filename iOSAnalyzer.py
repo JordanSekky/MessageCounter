@@ -53,9 +53,11 @@ with progress.Bar(expected_size=numdays*numlines+(numdays*numlines)//pollingnum)
     for line in monthlinenums:
         plt.axvline(x=line[0], ls='--')
         plt.annotate(monthdict[line[1].month], xy=(line[0] + 5, 15))
+    plt.autoscale(enable=True, axis='x', tight=True)
+
     fig = plt.gcf()
     fig.set_size_inches(18.5, 10.5)
-    fig.savefig(prefix + 'png.png', dpi=100)
+    fig.savefig(prefix + 'png.png', dpi=100, bbox_inches = 'tight')
     plt.clf()
     for number in numberlist:
         xlist = []
@@ -79,6 +81,7 @@ with progress.Bar(expected_size=numdays*numlines+(numdays*numlines)//pollingnum)
     for line in monthlinenums:
         plt.axvline(x=line[0]/pollingnum, ls='--')
         plt.annotate(monthdict[line[1].month], xy=(line[0]/pollingnum + 5/pollingnum, 15))
+    plt.autoscale(enable=True, axis='x', tight=True)
     fig = plt.gcf()
     fig.set_size_inches(18.5, 10.5)
-    fig.savefig(prefix + 'slopes.png', dpi=100)
+    fig.savefig(prefix + 'slopes.png', dpi=100, bbox_inches = 'tight')
