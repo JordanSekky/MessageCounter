@@ -18,6 +18,7 @@ numlines: The number of people to show on the graph, sorted by total number of
 messages, descending.
 numdays: Number of days since the most recent message to show.
 pollingnum: The interval at which the texting velocity is measured at, in days.
+```
 
 
 Folder Structure
