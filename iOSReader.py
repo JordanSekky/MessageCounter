@@ -27,6 +27,9 @@ class reader():
         self._wordDict = {}
         # Dictionary for caching the total number of messages for each number.
         self._countDict = {}
+        # Dictionary for caching the total number of sent messages for each
+        # number.
+        self._sentDict = {}
         # Boolean which defines whether the dictionaries have been built.
         self._built = False
 
@@ -36,6 +39,15 @@ class reader():
         
         c = self._connSMS.cursor()
         c.execute("SELECT `date` FROM `message`  ORDER BY `date` DESC LIMIT 0, 1;")
+        mostrecent = c.fetchone()[0]
+        return self._intToDate(mostrecent)
+
+    def firstDate(self):
+        
+        """ Returns the date of the most recent message in the database. """
+        
+        c = self._connSMS.cursor()
+        c.execute("SELECT `date` FROM `message`  ORDER BY `date` ASC LIMIT 0, 1;")
         mostrecent = c.fetchone()[0]
         return self._intToDate(mostrecent)
 
@@ -62,10 +74,12 @@ class reader():
         personRow = a.fetchone()
         # Use only the first two words in the name.
         # TODO: Correct this, its no longer needed.
-        if personRow[1] is not None:
+        if personRow[1] is not None and personRow[0] is not None:
             name = personRow[0] + " " + personRow[1].split()[0]
-        else:
+        elif personRow[0] is not None:
             name = personRow[0]
+        else:
+            name = personRow[1]
         return name
 
     def getNumberFromHandle(self, handle):
@@ -145,12 +159,17 @@ class reader():
                 self._countDict[number] = 0
             if number not in self._wordDict.keys():
                 self._wordDict[number] = 0
-            c.execute("SELECT `text` FROM 'message' WHERE handle_id=" + str(key))
+            if number not in self._sentDict.keys():
+                self._sentDict[number] = 0
+            c.execute("SELECT `text`, `is_sent` FROM 'message' WHERE handle_id=" + str(key))
             messageList = c.fetchall()
             for messagetuple in messageList:
                 message = messagetuple[0]
-                self._countDict[number] += 1
+                sent = messagetuple[1]
+                if sent == True:
+                    self._sentDict[number] += 1
                 if message is not None:
+                    self._countDict[number] += 1
                     self._wordDict[number] += len(re.findall("[a-zA-Z_]+", message))
 
 
@@ -235,6 +254,7 @@ class reader():
             for handle in self._getHandlesFromNumber(number):
                 c.execute("SELECT COUNT(*) FROM `message` WHERE 1=1 AND `date` < ? AND `handle_id` = ? AND `text` IS NOT NULL;", (end, handle))
                 count += c.fetchone()[0]
+                self._sentDict = {}
         return count 
 
 
@@ -277,6 +297,14 @@ class reader():
             self._build()
         return self._wordDict[num]
 
+    def sentFromNumber(self, num):
+        
+        """ Returns the total number of messages sent to a given number. """
+        
+        if not self._built:
+            self._build()
+        return self._sentDict[num]
+
     def _intToDate(self, integer):
         
         """ Converts a time in interger format (seconds since January First 2001) to a datetime object. """
@@ -302,6 +330,22 @@ class reader():
         handles = [handle for handle, number in self._handleDict.items() if number == num]
         return handles
        
+    def instancesOf(self, phrase, num):
+
+        """ Searches for instances of a given phrase/word
+
+        :phrase: the word or phrase to search for.
+        :num: The number for the conversation to search.
+        :returns: Number of instances of the given phrase.
+
+        """
+        messages = self.messagesFromNumber(num)
+        total = 0
+        for message in messages:
+            if message.text is not None:
+                total += len(re.findall(phrase.upper(), message.text.upper()))
+        return total
+
 
 class Message():
 
